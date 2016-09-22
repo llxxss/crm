@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="cacheManager" ref="cacheManager" />
+		<property name="realm" ref="realm"></property>
+	</bean>
+
+	<bean id="realm" class="com.atguigu.crm.shiro.MyShiro">
+		<property name="credentialsMatcher">
+			<bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+				<property name="hashAlgorithmName" value="MD5"/>
+				<property name="hashIterations" value="1024"></property>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+		<property name="cacheManagerConfigFile" value="classpath:ehcache.xml"></property>
+	</bean>
+
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"></bean>
+
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager"></property>
+		<property name="loginUrl" value="/index"/>
+		<property name="unauthorizedUrl" value="/unauthorized.jsp"/>
+		 <property name="filterChainDefinitions">
+			<value>
+				/index = anon
+                /user/login = anon
+                /user/navigation=authc
+                /static/** = anon
+                
+                /chance/** = roles[chance]
+                /report/** = roles[report]
+                /user/** = roles[user]
+                /role/** = roles[role]
+				/plan/** = roles[plan]
+				/dict/** = roles[dict]
+				/product/** = roles[product]
+				/storage/** = roles[storage]
+				/customer/** = roles[customer]
+				/contact/** = roles[customer]
+                
+                
+                # everything else requires authentication:
+                /** = authc
+			</value>
+		</property>
+		
+		<!-- <property name="filterChainDefinitionMap" ref="filterChainDefinitionMap"></property>  -->
+	</bean>
+	
+		<!-- <bean id="filterChainDefinitionMapBuilder" class="com.atguigu.crm.factory.FilterChainDefinitionMapBuilder"></bean>
+
+	<bean id="filterChainDefinitionMap"
+		factory-bean="filterChainDefinitionMapBuilder" factory-method="buildFilterChainDefinitionMap"></bean> 	 -->
+
+</beans>

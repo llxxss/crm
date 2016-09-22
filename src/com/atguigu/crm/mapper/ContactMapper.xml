@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.crm.mapper.ContactMapper">
+
+	<delete id="delete">
+		delete from contacts where id=#{id}
+	</delete>
+
+	<update id="update">
+		update contacts set name=#{name},tel=#{tel},sex=#{sex},position=#{position},mobile=#{mobile},memo=#{memo}
+		where id=#{id}
+	</update>
+
+	<select id="get" resultType="com.atguigu.crm.entity.Contact">
+		select id,name,tel,sex,position,mobile,memo, customer_id as "customer.id" 
+		from contacts
+		where id=#{id}
+	</select>
+	
+	<insert id="saveContact" >
+	insert into contacts(id,name,tel,sex,position,mobile,memo, customer_id)
+	values(crm_seq.nextval,#{name},#{tel},#{sex},#{position},#{mobile},#{memo} ,#{customer.id})
+	</insert>
+
+
+	<select id="getContent" resultType="com.atguigu.crm.entity.Contact">
+		SELECT *
+		FROM(
+			select  rownum rn,id,memo,mobile,name,position,sex,tel from contacts where customer_id=#{id}
+		)
+		<![CDATA[WHERE rn >= #{firstIndex} AND rn < #{endIndex}]]> 
+	</select>
+
+	<select id="getTotalElment" resultType="long">
+		select count(id) from contacts where customer_id=#{id}
+	</select>
+	
+	<select id="getListByid" resultType="com.atguigu.crm.entity.Contact">
+		select id,name from contacts where customer_id=#{id}
+	</select>
+
+	<insert id="save">
+		<selectKey keyProperty="customer.id" order="BEFORE" resultType="long">
+			select crm_seq.nextval-1 from dual	
+		</selectKey>
+			insert into contacts(id,name,tel,sex,position,mobile,memo, customer_id)
+			values(crm_seq.nextval,#{name},#{tel},#{sex},#{position},#{mobile},#{memo} ,#{customer.id})
+	</insert>
+	
+	<select id="getManagers" resultType="com.atguigu.crm.entity.Contact">
+		select id,name from contacts where customer_id=#{id}
+	</select>
+	
+	
+
+	
+</mapper>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.crm.mapper.CustomerDrainMapper">
+
+	<update id="confirm">
+		update customer_drains set reason=#{reason},status='流失',drain_date=#{drainDate}
+		where id=#{id}
+	</update>
+
+	<update id="delay">
+		update customer_drains set delay=#{delay}
+		where id=#{id}
+	</update>
+
+	<select id="get" resultType="com.atguigu.crm.entity.CustomerDrain">
+		select d.id,d.reason,d.drain_date,d.last_order_date,d.delay,
+		d.status,c.id as "customer.id",c.name as "customer.name",
+		s.id as "customer.manager.id",s.name as "customer.manager.name" 
+		from customer_drains d
+		left join customers c on d.customer_id=c.id
+		left join contacts s on c.manager_id=s.id
+		where d.id=#{id}
+	</select>
+
+	<select id="getTotalElment" resultType="long">
+		select count(id) from customer_drains d
+		left join customers c on d.customer_id=c.id
+		left join contacts s on c.manager_id=s.id
+		where 1=1
+		<if test="customerName!=null">
+			and c.name like #{customerName}
+		</if>
+		<if test="customerManagerName!=null">
+			and s.name like #{customerManagerName}
+		</if>
+	</select>
+
+	<select id="getContent" resultType="com.atguigu.crm.entity.CustomerDrain">
+		select *
+		from (
+		select rownum rn,t.*
+		from(
+			select d.id,d.reason,d.drain_date,d.last_order_date,
+			d.status,c.id as "customer.id",c.name as "customer.name",
+			s.id as "customer.manager.id",s.name as "customer.maneger.name" 
+			from customer_drains d
+			left join customers c on d.customer_id=c.id
+			left join contacts s on c.manager_id=s.id
+			where 1=1
+			<if test="customerName!=null">
+				and c.name like #{customerName}
+			</if>
+			<if test="customerManagerName!=null">
+				and s.name like #{customerManagerName}
+			</if>
+		) t
+		)
+		<![CDATA[WHERE rn >= #{firstIndex} AND rn < #{endIndex}]]>		
+		
+	</select>
+	
+</mapper>

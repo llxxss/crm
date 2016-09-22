@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.crm.mapper.ReportMapper">
+
+	<select id="getCustomerDrainTotalElment" resultType="long">
+		select count(d.reason) from customer_drains d
+	</select>
+
+	<select id="getCustomerDrainContent" resultType="com.atguigu.crm.entity.CustomerDrain">
+		select d.drain_date as "drainDate",d.reason,c.name as "customer.name",t.name as "customer.manager.name"  from customer_drains d
+		left join customers c on c.id=d.customer_id
+		left join contacts t on c.manager_id=t.id
+	</select>
+	
+	<select id="getCustomerConsistTotalElement" resultType="long">
+		select count(*) from(
+		select ${type} from customers 
+		where ${type} is not null
+		group by ${type}
+		)	
+	</select>
+
+	<select id="getCustomerConsistContent" resultType="java.util.Map">
+	select ${type} as "type",count(id) as "count" from customers 
+	where ${type} is not null
+	group by ${type}
+	</select>
+
+	<select id="getCustomerPayTotalElment" resultType="long">
+		select count( distinct c.name) from customers c
+		inner join orders o on o.customer_id=c.id
+		inner join order_items oi on oi.order_id=o.id
+		inner join products p on p.id=oi.product_id
+		where 1=1 
+		<if test="custName !=null">
+    	 	and c.name like #{custName}
+    	</if>
+    	<if test="date1 !=null">
+    		and o.order_date >=#{date1}
+    	</if>
+    	<if test="date2 !=null">
+    		<![CDATA[
+    		and o.order_date <=#{date2}
+    		]]>
+    	</if>
+	</select>
+	
+	<select id="getCustomerPayContent" resultType="java.util.Map">
+		select *
+		from(select rownum rn,t.* from (
+		select c.name as "custName",sum(oi.item_count*p.price) as "menoy" from customers c
+		inner join orders o on o.customer_id=c.id
+		inner join order_items oi on oi.order_id=o.id
+		inner join products p on p.id=oi.product_id
+		where 1=1
+    	<if test="custName !=null">
+    	 	and c.name like #{custName}
+    	</if>
+    	<if test="date1 !=null">
+    		and o.order_date >=#{date1}
+    	</if>
+    	<if test="date2 !=null">
+    		<![CDATA[
+    		and o.order_date <=#{date2}
+    		]]>
+    	</if>
+		group by c.name
+		) t)
+		<![CDATA[
+    	where rn>=#{firstIndex} and rn<#{endIndex}
+    	]]>
+	</select>
+	
+</mapper>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.crm.mapper.StorageMapper">
+	
+	<update id="updateStockCount">
+		update storages set stock_count=#{stockCount} where id=#{id} 
+	</update>
+	
+	<select id="get" resultType="com.atguigu.crm.entity.Storage">
+		select rownum rn,s.id,s.memo,s.stock_count,s.stock_ware,s.ware_house,p.id as "product.id",p.name as "product.name"
+		from storages s
+		left join products p on s.product_id = p.id 
+		where s.id=#{id}
+	</select>
+
+	<delete id="delete">
+		delete from storages where id=#{id}
+	</delete>
+	
+	<insert id="save">
+		insert into storages(id,memo,stock_count,stock_ware,ware_house,product_id)
+		values(crm_seq.nextval,#{memo},#{stockCount},#{stockWare},#{wareHouse},#{product.id})
+	</insert>
+
+	
+	<select id="getContent" resultType="com.atguigu.crm.entity.Storage">
+		select *
+		from(
+			select rownum rn,s.id,s.memo,s.stock_count,s.stock_ware,s.ware_house,p.name as "product.name"
+			from storages s
+			left join products p on s.product_id = p.id
+		)
+		where <![CDATA[rn>=#{firstIndex} and rn<#{endIndex}]]>
+	</select>
+	
+	<select id="getTotalelment" resultType="int">
+		select count(id) from storages 
+	</select>
+</mapper>

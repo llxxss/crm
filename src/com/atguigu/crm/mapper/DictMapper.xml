@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.crm.mapper.DictMapper">
+	
+	<select id="getcredits" resultType="String">
+		select item from dicts where type='信用度'
+	</select>
+
+	<select id="getsatisfies" resultType="String">
+		select item from dicts where type='满意度'
+	</select>
+	
+	<select id="getRegions" resultType="String">
+		select item from dicts where type='地区'
+	</select>
+	
+	<select id="getLevels" resultType="String">
+		select item from dicts where type='客户等级'
+	</select>
+	
+</mapper>

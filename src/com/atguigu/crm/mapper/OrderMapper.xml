@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.crm.mapper.OrderMapper">
+
+	<resultMap type="com.atguigu.crm.entity.Order" id="orderValue">
+		<id column="id" property="id"/>
+		<result column="address" property="address"/>
+		<result column="order_date" property="date"/>
+		<result column="no" property="no"/>
+		<result column="status" property="status"/>
+		<collection property="items" ofType="com.atguigu.crm.entity.OrderItem">
+			<id column="itemid" property="id"/>
+			<result column="itemcount" property="count"/>
+			<result column="itemmomey" property="money"/>
+			<collection property="product" ofType="com.atguigu.crm.entity.Product">
+				<id column="productId" property="id"/>	
+			</collection>
+		</collection>
+	</resultMap>
+
+	<select id="get" resultMap="orderValue">
+		select t.id,t.address,t.order_date,t.no,t.status  ,
+		i.id as "itemid" ,i.item_count as "itemcount" ,i.money as "itemmomey",i.product_id as "productId"
+		from orders t 
+		left join order_items i
+		on i.order_id=t.id
+		where t.id=#{orderid}
+	</select>
+
+	<select id="getTotalElments" resultType="long">
+		select count(t.id)
+		from orders t where t.customer_id=#{customerId}
+	</select>
+	
+	<select id="getContent" resultType="com.atguigu.crm.entity.Order">
+		select t.id,t.address,t.order_date as "date",t.no,t.status,t.customer_id as "customer.id"
+		from orders t where t.customer_id=#{customerId}
+	</select>
+	
+</mapper>

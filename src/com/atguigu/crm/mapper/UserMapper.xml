@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.crm.mapper.UserMapper">
+	
+	<select id="getAllList" resultType="com.atguigu.crm.entity.User">
+		select id,name from users
+	</select>
+
+
+	<update id="update">
+		update users set enabled=#{enabled},name=#{name},
+		password=#{password},role_id=#{role.id}
+		where id=#{id}
+	</update>
+
+	<select id="get" resultType="com.atguigu.crm.entity.User">
+		select id,enabled,name,password,role_id,salt from users
+		where id=#{id}
+	</select>
+
+	<delete id="delete">
+		delete from users where id=#{id}
+	</delete>
+
+	<insert id="save">
+		insert into users(id,enabled,name,password,role_id,salt)
+		values(crm_seq.nextval,#{enabled},#{name},#{password},#{role.id},#{salt})
+	</insert>
+
+	<select id="getTotalCount" resultType="long">
+		select count(id) from users
+	</select>
+	
+	<select id="getList" resultType="com.atguigu.crm.entity.User">
+		SELECT u.id,u.name,u.enabled
+		FROM users u
+	</select>
+	
+	<resultMap type="com.atguigu.crm.entity.User" id="userMap">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="password" property="password"/>
+		<result column="enabled" property="enabled"/>
+		<result column="role_id" property="role.id"/>
+		<result column="salt" property="salt"/>
+		<collection property="role.authorities" ofType="com.atguigu.crm.entity.Authority">
+			<id column="subid" property="id"/>
+			<result column="subName" property="name"/>
+			<result column="diaplay_Name" property="displayName"/>
+			<result column="suburl" property="url"/>
+			<result column="paid" property="parentAuthority.id"/>
+			<result column="paname" property="parentAuthority.name"/>
+		</collection>
+		
+	</resultMap>
+	
+	<select id="getUserByName" resultMap="userMap">
+	select u.id,u.name,u.password,u.enabled,u.salt,u.role_id,pa.id as "paid",pa.display_name as "paname",
+	r.authority_id as "subid",a.name as "diaplay_Name",a.display_name as "subName",a.url as "suburl" from users u
+	left join role_authority r on r.role_id=u.role_id
+	left join authorities a on r.authority_id=a.id
+	left join authorities pa on a.parent_authority_id=pa.id
+	WHERE u.name = #{name}
+	</select>
+</mapper>

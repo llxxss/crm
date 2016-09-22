@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.crm.mapper.CustomerMapper">
+
+	<select id="getAll" resultType="com.atguigu.crm.entity.Customer">
+		select id,name from customers
+	</select>
+
+	<update id="delete">
+		update customers set state='删除' where id=#{id}
+	</update>
+	
+
+	<update id="update">
+		update customers set no=#{no},name=#{name},region=#{region},customer_level=#{level},state=#{state},manager_id=#{manager.id},
+		address=#{address},zip=#{zip},tel=#{tel},fax=#{fax},websit=#{websit},licence_no=#{licenceNo},chief=#{chief},
+		bankroll=#{bankroll},turnover=#{turnover},bank=#{bank},bank_account=#{bankAccount},local_tax_no=#{localTaxNo},
+		national_tax_no=#{nationalTaxNo}
+		where id=#{id}
+	</update>
+
+	<select id="get" resultType="com.atguigu.crm.entity.Customer">
+		select c.id,c.no,c.name,c.region,c.customer_level as "level",c.state,t.name as "manager.name",
+		c.address,c.zip,c.tel,c.fax,c.websit,c.licence_no,c.chief,c.bankroll,c.turnover,c.bank,
+		c.bank_account,c.local_tax_no,c.national_tax_no,c.satify,c.credit  from customers c 
+		left join contacts t on c.manager_id=t.id
+		where c.id=#{id}
+	</select>
+	
+	<insert id="save">
+		insert into customers(id,name,no,state) values(crm_seq.nextval,#{name},#{no},#{state})
+	</insert>
+	
+	<select id="getAlltotalCount" resultType="long">
+		select count(id) from customers 
+	</select>
+	
+	<select id="getAllList" resultType="com.atguigu.crm.entity.Customer">
+	SELECT *
+		FROM(
+			select rownum rn, t.id,c.no,c.name,c.region,c.customer_level as "level",c.state,t.name as "manager.name" from customers c 
+			left join contacts t on c.manager_id=t.id
+		)
+		<![CDATA[WHERE rn >= #{firstIndex} AND rn < #{endIndex}]]>	
+	</select>
+	<!-- 待查询条件的分页 -->
+	
+	
+	<select id="getAlltotalCount2" resultType="long">
+		select count(t.id) from customers t
+ 		left join contacts c on t.manager_id=c.id
+		where 1=1
+		<if test="name !=null">
+			and t.name like #{name}
+		</if>
+		<if test="region !=null">
+			and region='#{region}'
+		</if>
+		<if test="managerName !=null">
+			and  c.name like #{managerName}
+		</if>
+		<if test="level !=null">
+			and t.customer_level = '#{level}'
+		</if>
+		<if test="state !=null">
+			and t.state = '#{state}'
+		</if>
+	</select>
+	
+	<select id="getTotalContent" resultType="com.atguigu.crm.entity.Customer">
+	SELECT *
+		FROM(
+			select rownum rn, t.id,t.no,t.name,t.region,t.customer_level as "level",t.state,c.name as "manager.name" from customers t 
+			left join contacts c on t.manager_id=c.id
+			where 1=1
+		<if test="name !=null">
+			and t.name like #{name}
+		</if>
+		<if test="region !=null">
+			and region='#{region}'
+		</if>
+		<if test="managerName !=null">
+			and  c.name like #{managerName}
+		</if>
+		<if test="level !=null">
+			and t.customer_level = '#{level}'
+		</if>
+		<if test="state !=null">
+			and t.state = '#{state}'
+		</if>
+		)
+		<![CDATA[WHERE rn >= #{firstIndex} AND rn < #{endIndex}]]>	
+	</select>
+	
+</mapper>

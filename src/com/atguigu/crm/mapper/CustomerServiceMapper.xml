@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.crm.mapper.CustomerServiceMapper">
+
+	<update id="feedBack">
+		update customer_services set deal_result=#{dealResult} , satisfy=#{satisfy},service_state='已归档'
+		where id=#{id}
+	</update>
+
+	<select id="getFeedbackTotalElment" resultType="long">
+		select count(s.id) from customer_services s 
+		where s.service_state='已处理' 
+		<include refid="service"/>
+	</select>
+	<select id="getArchiveTotalElment" resultType="long">
+		select count(s.id) from customer_services s 
+		where s.service_state='已归档' 
+		<include refid="service"/>
+	</select>
+	<select id="getDealTotalElment" resultType="long">
+		select count(s.id) from customer_services s 
+		where s.service_state='已分配' 
+		<include refid="service"/>
+	</select>
+
+	
+	
+	<select id="getArchiveContent" resultType="com.atguigu.crm.entity.CustomerService">
+		select s.id,s.service_type,s.service_title,s.service_request,s.service_state,s.create_date,s.created_id as "createdby.id",u.name as "createdby.name",
+		s.customer_id as "customer.id",c.name as "customer.name" from customer_services s
+		left join customers c on c.id=s.customer_id
+		left join users u on u.id=s.created_id
+		where s.service_state='已归档' 
+		<include refid="service"/>
+	</select>
+	<select id="getFeedbackContent" resultType="com.atguigu.crm.entity.CustomerService">
+		select s.id,s.service_type,s.service_title,s.service_request,s.service_state,s.create_date,s.created_id as "createdby.id",u.name as "createdby.name",
+		s.customer_id as "customer.id",c.name as "customer.name" from customer_services s
+		left join customers c on c.id=s.customer_id
+		left join users u on u.id=s.created_id
+		where s.service_state='已处理' 
+		<include refid="service"/>
+	</select>
+	<select id="getDealContent" resultType="com.atguigu.crm.entity.CustomerService">
+		select s.id,s.service_type,s.service_title,s.service_request,s.service_state,s.create_date,s.created_id as "createdby.id",u.name as "createdby.name",
+		s.customer_id as "customer.id",c.name as "customer.name" from customer_services s
+		left join customers c on c.id=s.customer_id
+		left join users u on u.id=s.created_id
+		where s.service_state='已分配' 
+		<include refid="service"/>
+	</select>
+	
+	<update id="deal">
+		update customer_services set  service_request=#{serviceRequest},deal_date=#{dealDate},service_state='已处理'
+		where id=#{id}
+	</update>
+
+	<select id="get" resultType="com.atguigu.crm.entity.CustomerService">
+		select s.id,s.allot_date,s.create_date,s.deal_date,s.deal_result,s.satisfy,s.service_deal,s.service_request,
+		s.service_state,s.service_title,s.service_type,s.allot_id as "allotTo.id",a.name as "allotTo.name" ,
+		s.service_request,s.service_state,s.create_date,s.created_id as "createdby.id",u.name as "createdby.name",
+		s.customer_id as "customer.id",c.name as "customer.name" from customer_services s
+		left join customers c on c.id=s.customer_id
+		left join users u on u.id=s.created_id
+		left join users a on a.id=s.allot_id
+		where s.id=#{id}
+	</select>
+
+	<delete id="delete">
+		delete from customer_services where id=#{id}
+	</delete>
+
+	<update id="allot">
+		update customer_services set allot_id =#{allotId},allot_date=#{date},service_state='已分配'
+		where id=#{id}
+	</update>
+
+	<sql id="service">
+		<if test="serviceType!=null">
+			and s.service_type like #{servicType}
+		</if>
+		<if test="serviceTitle!=null">
+			and s.service_title like #{serviceTitle}
+		</if>
+		<if test="customerName!=null">
+			and c.name='#{customerName}'
+		</if>
+		<if test="minDate!=null">
+			and s.create_date>=minDate
+		</if>
+		<if test="minDate!=null">
+			and <![CDATA[s.create_date<maxDate ]]>
+		</if>
+	</sql>
+	<select id="getAllotContent" resultType="com.atguigu.crm.entity.CustomerService">
+		select s.id,s.service_type,s.service_title,s.service_request,s.service_state,s.create_date,s.created_id as "createdby.id",u.name as "createdby.name",
+		s.customer_id as "customer.id",c.name as "customer.name" from customer_services s
+		left join customers c on c.id=s.customer_id
+		left join users u on u.id=s.created_id
+		where s.service_state='新创建' 
+		<include refid="service"/>
+	</select>
+	
+	<select id="getAllotTotalElment" resultType="long">
+		select count(id) from customer_services s 
+		left join customers c on c.id=s.customer_id
+		left join users u on u.id=s.created_id
+		where s.service_state='新创建' 
+		<include refid="service"/>
+	</select>
+	
+	<select id="getServiceType" resultType="String">
+		select t.item from dicts t
+		where type = '服务类型'
+	</select>
+	
+	<insert id="save">
+		insert into customer_services(id,service_type,service_title,service_request,
+		service_state,create_date,created_id,customer_id)
+		values(crm_seq.nextval,#{serviceType},#{serviceTitle},#{serviceRequest},#{serviceState},
+		#{createDate},#{createdby.id},#{customer.id})
+	</insert>
+	
+</mapper>
